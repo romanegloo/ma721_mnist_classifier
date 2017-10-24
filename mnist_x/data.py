@@ -36,7 +36,9 @@ class DataLoader(object):
                  self.test_img_file, self.test_lbl_file]
         for file in files:
             if not os.path.isfile(file):
-                raise IOError("data file not exist {}".format(file))
+                msg = "Data file not found. Please check the path " +\
+                      "or download files using scripts/download_files.py "
+                raise IOError(msg)
 
     def load_training_torch(self):
         images, labels = self._load('train')

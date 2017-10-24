@@ -4,7 +4,6 @@ import argparse
 import logging
 import os
 import subprocess
-import matplotlib.pyplot as plt
 import numpy as np
 from prettytable import PrettyTable
 
@@ -126,7 +125,6 @@ def get_random_params():
         args.hidden_dim = 2 ** np.random.randint(3, 11)
     params['num_hidden_units'] = args.hidden_dim
 
-    print(params)
     return params
 
 
@@ -138,7 +136,7 @@ def get_random_params():
 def run(args):
     # --------------------------------------------------------------------------
     # Loading Data
-    logger.info('-' * 100)
+    logger.info('-' * 80)
     logger.info('Load data files')
     loader = data.DataLoader(args)
     (loader_train, loader_valid) = loader.load_training_torch()
@@ -162,7 +160,7 @@ def run(args):
 
     # --------------------------------------------------------------------------
     # Train/Test Loop
-    logger.info('-' * 100)
+    logger.info('-' * 80)
     logger.info('Start training...')
     stats = {
         'epoch': 0,
@@ -215,7 +213,7 @@ if __name__ == '__main__':
                          choices=['original', 'dataset1', 'dataset2',
                                   'dataset3', 'dataset4'],
                          help='Name of modified datasets')
-    runtime.add_argument('--num-random-models', type=int, default=5,
+    runtime.add_argument('--num-random-models', type=int, default=10,
                          help='number of random searches over hyper parameter '
                               'space')
 
@@ -279,9 +277,10 @@ if __name__ == '__main__':
     best_model_ratio = 0
     best_model = None
     for m in range(args.num_random_models):
-        logger.info('-' * 100)
+        logger.info('-' * 80)
         logger.info('Model #{}'.format(m+1))
         h_params = get_random_params()  # set random parameters
+        print("\n{}\n".format(h_params))
         stats = run(args)  # RUN ~!
         if stats['best_ratio'] >= best_model_ratio:
             best_model_ratio = stats['best_ratio']
@@ -291,11 +290,12 @@ if __name__ == '__main__':
 
     # --------------------------------------------------------------------------
     # Display Results
-    logger.info('-' * 100)
+    logger.info('-' * 80)
     logger.info('Best Model...')
     print(stats)
 
     if args.plot_losses:
+        import matplotlib.pyplot as plt
         x = list(range(args.num_epochs))
         plt.plot(x, stats['train_losses'], 'g', label='train')
         plt.plot(x, stats['test_losses'], 'r', label='test')
