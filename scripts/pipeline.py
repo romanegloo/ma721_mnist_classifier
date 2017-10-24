@@ -276,6 +276,7 @@ if __name__ == '__main__':
 
     best_model_ratio = 0
     best_model = None
+    best_stats = None
     for m in range(args.num_random_models):
         logger.info('-' * 80)
         logger.info('Model #{}'.format(m+1))
@@ -284,7 +285,8 @@ if __name__ == '__main__':
         stats = run(args)  # RUN ~!
         if stats['best_ratio'] >= best_model_ratio:
             best_model_ratio = stats['best_ratio']
-            best_model = stats
+            best_model = h_params
+            best_stats = stats
             logger.info('Best Model Updated... (ratio: {:.2f})'
                         ''.format(best_model_ratio))
 
