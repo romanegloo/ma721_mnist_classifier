@@ -300,6 +300,7 @@ if __name__ == '__main__':
     logger.info('-' * 80)
     logger.info('Best Model...')
     print(best_model)
+    print(best_stats)
 
     if args.plot_losses:
         import matplotlib.pyplot as plt
