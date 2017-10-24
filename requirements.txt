@@ -1,2 +1,2 @@
-torch==0.2.0_3
-tqdm==4.19.4
+torch
+tqdm

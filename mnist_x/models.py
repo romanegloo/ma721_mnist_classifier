@@ -16,7 +16,7 @@ class DynamicNet(nn.Module):
     def forward(self, x):
         h_relu = self.input_layer(x).clamp(min=0)
         for _ in range(self.args.num_hidden_layers - 1):
-            h_relu = self.middle_linear(h_relu).clamp(min=0)
+            h_relu = self.middle_layer(h_relu).clamp(min=0)
         y_pred = self.output_layer(h_relu)
         return F.log_softmax(y_pred)
 
