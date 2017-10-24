@@ -106,23 +106,20 @@ def test(loader_test, model, global_stats):
         data.DataLoader.draw(sample[0])
 
 
-def get_random_params(fixed_params=[]):
+def get_random_params():
     global args
     params = {}
 
     # minibatch_size
-    args.batch_size = fixed_params['batch_size'] \
-        if 'batch_size' in fixed_params else 2 ** np.random.randint(3, 11)
+    args.batch_size = 2 ** np.random.randint(4, 11)
     params['minibatch_size'] = args.batch_size
 
     # number of hidden layers
-    args.num_hidden_layers = fixed_params['num_hidden_layers'] \
-        if 'num_hidden_layers' in fixed_params else 2 ** np.random.randint(8)
+    args.num_hidden_layers = 2 ** np.random.randint(7)
     params['num_hidden_layers'] = args.num_hidden_layers
 
     # number of hidden units
-    args.hidden_dim = fixed_params['hidden_dim'] \
-        if 'hidden_dim' in fixed_params else 2 ** np.random.randint(3, 11)
+    args.hidden_dim = 2 ** np.random.randint(3, 11)
     params['num_hidden_units'] = args.hidden_dim
 
     return params
@@ -184,13 +181,15 @@ def run(args):
         if ratio > stats['best_ratio']:
             stats['best_ratio'] = ratio
             stats['best_accuracy'] = stats['test_accuracy'][-1]
-            patience = 3
+            if args.early_stop:
+                patience = 3
         else:
-            patience -= 1
+            if args.early_stop:
+                patience -= 1
         logger.info('ratio to capacity: {} / {} = {:.4f}'
                     ''.format(stats['test_accuracy'][-1],
                               total_params * epoch, ratio))
-        if patience == 0:
+        if patience == 0 and args.early_stop:
             break
 
     return stats
@@ -206,7 +205,7 @@ if __name__ == '__main__':
     runtime = parser.add_argument_group('Runtime')
     runtime.add_argument('--num-epochs', type=int, default=50,
                         help='Number of full data iterations')
-    runtime.add_argument('--batch-size', type=int, default=None,
+    runtime.add_argument('--batch-size', type=int, default=64,
                         help='Batch size for training')
     runtime.add_argument('--data-workders', type=int, default=4,
                          help='Number of subprocesses for data loading')
@@ -217,6 +216,9 @@ if __name__ == '__main__':
     runtime.add_argument('--num-random-models', type=int, default=10,
                          help='number of random searches over hyper parameter '
                               'space')
+    runtime.add_argument('--early-stop', action='store_true',
+                         help='stop training when no improvements seen in 3'
+                         'times')
 
     # Files
     files = parser.add_argument_group('Filesystem')
@@ -247,9 +249,9 @@ if __name__ == '__main__':
                        help='input data dimension')
     model.add_argument('--output-dim', type=int, default=10,
                        help='output dimension (num. of classes)')
-    model.add_argument('--hidden-dim', type=int, default=None,
+    model.add_argument('--hidden-dim', type=int, default=64,
                        help='Dimension of hidden layer')
-    model.add_argument('--num-hidden-layers', type=int, default=None,
+    model.add_argument('--num-hidden-layers', type=int, default=1,
                        help='Number of hidden layers')
     model.add_argument('--optimizer', type=str, default='sgd',
                        help='Optimizer: [sgd, adamax, adam]')
@@ -267,10 +269,6 @@ if __name__ == '__main__':
     args = parser.parse_args()
     set_defaults(args)
 
-    # fix parameters if given by user
-    fixed_params = {}
-    # todo.
-
     # set up logger
     logger.setLevel(logging.INFO)
     fmt = logging.Formatter('%(asctime)s: [ %(message)s ]',
@@ -285,7 +283,14 @@ if __name__ == '__main__':
     for m in range(args.num_random_models):
         logger.info('-' * 80)
         logger.info('Model #{}'.format(m+1))
-        h_params = get_random_params(fixed_params)  # set random parameters
+        if m > 0:
+            h_params = get_random_params()  # set random parameters
+        else:
+            h_params = {
+                'batch_size': args.batch_size,
+                'num_hidden_layers': args.num_hidden_layers,
+                'hidden_dim': args.hidden_dim
+            }
         print("\n{}\n".format(h_params))
         stats = run(args)  # RUN ~!
         if stats['best_ratio'] >= best_model_ratio:
