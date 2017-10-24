@@ -106,23 +106,23 @@ def test(loader_test, model, global_stats):
         data.DataLoader.draw(sample[0])
 
 
-def get_random_params():
+def get_random_params(fixed_params=[]):
     global args
     params = {}
 
     # minibatch_size
-    if args.batch_size is None:
-        args.batch_size = 2 ** np.random.randint(3, 11)
+    args.batch_size = fixed_params['batch_size'] \
+        if 'batch_size' in fixed_params else 2 ** np.random.randint(3, 11)
     params['minibatch_size'] = args.batch_size
 
     # number of hidden layers
-    if args.num_hidden_layers is None:
-        args.num_hidden_layers = 2 ** np.random.randint(8)
+    args.num_hidden_layers = fixed_params['num_hidden_layers'] \
+        if 'num_hidden_layers' in fixed_params else 2 ** np.random.randint(8)
     params['num_hidden_layers'] = args.num_hidden_layers
 
     # number of hidden units
-    if args.hidden_dim is None:
-        args.hidden_dim = 2 ** np.random.randint(3, 11)
+    args.hidden_dim = fixed_params['hidden_dim'] \
+        if 'hidden_dim' in fixed_params else 2 ** np.random.randint(3, 11)
     params['num_hidden_units'] = args.hidden_dim
 
     return params
@@ -292,13 +292,13 @@ if __name__ == '__main__':
     # Display Results
     logger.info('-' * 80)
     logger.info('Best Model...')
-    print(stats)
+    print(best_model)
 
     if args.plot_losses:
         import matplotlib.pyplot as plt
         x = list(range(args.num_epochs))
-        plt.plot(x, stats['train_losses'], 'g', label='train')
-        plt.plot(x, stats['test_losses'], 'r', label='test')
+        plt.plot(x, best_model['train_losses'], 'g', label='train')
+        plt.plot(x, best_model['test_losses'], 'r', label='test')
         plt.xlabel('epoch')
         plt.ylabel('loss')
         plt.title('Test/Train Losses')
