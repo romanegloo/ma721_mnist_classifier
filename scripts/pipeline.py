@@ -183,6 +183,7 @@ def run(args):
         ratio = stats['test_accuracy'][-1] / (total_params * epoch)**(1/10.)
         if ratio > stats['best_ratio']:
             stats['best_ratio'] = ratio
+            stats['best_accuracy'] = stats['test_accuracy'][-1]
             patience = 3
         else:
             patience -= 1
@@ -266,6 +267,10 @@ if __name__ == '__main__':
     args = parser.parse_args()
     set_defaults(args)
 
+    # fix parameters if given by user
+    fixed_params = {}
+    # todo.
+
     # set up logger
     logger.setLevel(logging.INFO)
     fmt = logging.Formatter('%(asctime)s: [ %(message)s ]',
@@ -280,7 +285,7 @@ if __name__ == '__main__':
     for m in range(args.num_random_models):
         logger.info('-' * 80)
         logger.info('Model #{}'.format(m+1))
-        h_params = get_random_params()  # set random parameters
+        h_params = get_random_params(fixed_params)  # set random parameters
         print("\n{}\n".format(h_params))
         stats = run(args)  # RUN ~!
         if stats['best_ratio'] >= best_model_ratio:
