@@ -1,7 +1,3 @@
-certifi==2017.7.27.1
-chardet==3.0.4
-idna==2.6
--e git+https://github.com/romanegloo/ma721_mnist_classifier.git@e33e522500dec1a1147114f99cff2419d5209406#egg=mnist_x
 numpy==1.13.3
 prettytable==0.7.2
 PyYAML==3.12

@@ -30,6 +30,7 @@ class DataLoader(object):
         self.num_workers = args.data_workders
         self.shuffle = True
         self.dataset_name = args.dataset_name
+        self.pin_memory = False  #args.cuda
 
         # check dataset files exist
         files = [self.train_img_file, self.train_lbl_file,
@@ -63,11 +64,13 @@ class DataLoader(object):
         loader_train = utils.DataLoader(dataset,
                                         batch_size=self.batch_size,
                                         num_workers=self.num_workers,
-                                        sampler=train_sampler)
+                                        sampler=train_sampler,
+                                        pin_memory=self.pin_memory)
         loader_valid = utils.DataLoader(dataset,
                                         batch_size=self.batch_size,
                                         num_workers=self.num_workers,
-                                        sampler=valid_sampler)
+                                        sampler=valid_sampler,
+                                        pin_memory=self.pin_memory)
         return (loader_train, loader_valid)
 
     def load_test_torch(self):
@@ -83,7 +86,8 @@ class DataLoader(object):
         return utils.DataLoader(dataset,
                                 batch_size=self.batch_size,
                                 shuffle=self.shuffle,
-                                num_workers=self.num_workers)
+                                num_workers=self.num_workers,
+                                pin_memory=self.pin_memory)
 
     def process_images(self, images, mode='train'):
         """preprocess input datasets, which are still numpy ndarrays"""

@@ -1,6 +1,7 @@
 from torch import nn
 import torch.nn.functional as F
 from torch.nn.modules.module import _addindent
+import torch.nn.init as init
 import numpy as np
 
 
@@ -9,14 +10,30 @@ class DynamicNet(nn.Module):
     def __init__(self, args):
         super(DynamicNet, self).__init__()
         self.args = args
-        self.input_layer = nn.Linear(args.input_dim, args.hidden_dim)
-        self.middle_layer = nn.Linear(args.hidden_dim, args.hidden_dim)
-        self.output_layer = nn.Linear(args.hidden_dim, args.output_dim)
+        self.input_layer = nn.Linear(args.input_dim, args.num_hidden_units)
+        self.middle_layers = nn.ModuleList()
+        for _ in range(args.num_hidden_layers - 1):
+            self.middle_layers.append(nn.Linear(args.num_hidden_units,
+                                                args.num_hidden_units))
+        self.output_layer = nn.Linear(args.num_hidden_units, args.output_dim)
+
+        # initialize weights
+        if args.weight_init == 'uniform':
+            init.uniform(self.input_layer.weight)
+            for layer in self.middle_layers:
+                init.uniform(layer.weight)
+            init.uniform(self.output_layer.weight)
+        elif args.weight_init == 'xavier_normal':
+            init.xavier_normal(self.input_layer.weight, gain=np.sqrt(2))
+            for layer in self.middle_layers:
+                init.xavier_normal(layer.weight, gain=np.sqrt(2))
+            init.xavier_normal(self.output_layer.weight, gain=np.sqrt(2))
+
 
     def forward(self, x):
         h_relu = self.input_layer(x).clamp(min=0)
-        for _ in range(self.args.num_hidden_layers - 1):
-            h_relu = self.middle_layer(h_relu).clamp(min=0)
+        for i in range(self.args.num_hidden_layers - 1):
+            h_relu = self.middle_layers[i](h_relu).clamp(min=0)
         y_pred = self.output_layer(h_relu)
         return F.log_softmax(y_pred)
 

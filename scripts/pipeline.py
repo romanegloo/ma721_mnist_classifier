@@ -6,7 +6,9 @@ import os
 import subprocess
 import numpy as np
 from prettytable import PrettyTable
+import sys
 
+import torch
 import torch.nn.functional as F
 import torch.optim as optim
 from torch.autograd import Variable
@@ -27,12 +29,24 @@ def set_defaults(args):
         args.model_name = time.strftime("%Y%m%d-") + str(uuid.uuid4())[:8]
     args.model_file = os.path.join(args.model_dir, args.model_name + '.mdl')
 
+    args.log_file = os.path.join(args.model_dir, args.model_name + '.txt')
+    logfile = logging.FileHandler(args.log_file, 'w')
+    logfile.setFormatter(fmt)  # use the same format
+    logger.addHandler(logfile)
+
     # change input dimensions, if dataset3 (3-digits) is used
     if args.dataset_name == 'dataset3':
         args.input_dim = 3 * 28 * 28
         args.output_dim = 1000
     elif args.dataset_name == 'dataset4':
         args.output_dim = 55
+
+    args.cuda = not args.no_cuda and torch.cuda.is_available()
+    if args.cuda:
+        torch.cuda.set_device(args.gpu)
+        logger.info('CUDA enabled (GPU %d)' % args.gpu)
+    else:
+        logger.info('Running on CPU only.')
 
 
 # ------------------------------------------------------------------------------
@@ -44,19 +58,30 @@ def train(loader_train, loader_valid, model, optimizer, global_stats):
     """Run over one epoch of training model with the provided data loader"""
     model.train()
 
+    correct = 0
     for idx, ex in enumerate(loader_train):
         images, labels = ex
-        x, y = Variable(images), Variable(labels)
+        if args.cuda:
+            x = Variable(images.cuda(async=True))
+            y = Variable(labels.cuda(async=True))
+        else:
+            x, y = Variable(images), Variable(labels)
         y_pred = model(x)
         loss = F.nll_loss(y_pred, y, size_average=False)
+        pred = y_pred.data.max(1, keepdim=True)[1]
+        correct += pred.eq(y.data.view_as(pred)).sum()
         optimizer.zero_grad()
         loss.backward()
         optimizer.step()
 
         if (idx+1) % 100 == 0:
-            logger.info('Epoch = {} | iter = {}/{} | loss = {:.2f}'
-                        ''.format(global_stats['epoch'], idx + 1,
-                                  len(loader_train), loss.data[0]))
+            logger.info('iter = {}/{} | loss = {:.2f}'
+                        ''.format(idx + 1, len(loader_train), loss.data[0]))
+    train_accuracy = 100. * correct / len(loader_train.sampler)
+    logger.info("== Epoch {} ==".format(global_stats['epoch']))
+    global_stats['train_accuracy'].append(train_accuracy)
+    logger.info("Training set || Accuracy: {}/{} ({:.2f}%)"
+                ''.format(correct, len(loader_train.sampler), train_accuracy))
 
     # validate
     model.eval()
@@ -65,7 +90,11 @@ def train(loader_train, loader_valid, model, optimizer, global_stats):
     len_v = len(loader_valid.sampler)
     for idx, ex in enumerate(loader_valid):
         images, labels = ex
-        x, y = Variable(images), Variable(labels)
+        if args.cuda:
+            x = Variable(images.cuda(async=True))
+            y = Variable(labels.cuda(async=True))
+        else:
+            x, y = Variable(images), Variable(labels)
         y_pred = model(x)
         loss = F.nll_loss(y_pred, y, size_average=False)
         pred = y_pred.data.max(1, keepdim=True)[1]
@@ -73,8 +102,8 @@ def train(loader_train, loader_valid, model, optimizer, global_stats):
         total_loss += loss.data[0]
     loss = total_loss / len_v
     accuracy = 100. * correct / len_v
-    global_stats['train_losses'].append(loss)
-    global_stats['train_accuracy'].append(accuracy)
+    global_stats['valid_losses'].append(loss)
+    global_stats['valid_accuracy'].append(accuracy)
     logger.info("Validation set || Average_loss: {:.4f}, "
                 "Accuracy: {}/{} ({:.2f}%)"
                 ''.format(loss, correct, len_v, accuracy))
@@ -86,7 +115,11 @@ def test(loader_test, model, global_stats):
     correct = 0
     sample = None  # sample images for last verification
     for img, target in loader_test:
-        img, target = Variable(img, volatile=True), Variable(target)
+        if args.cuda:
+            img = Variable(img.cuda(async=True), volatile=True)
+            target = Variable(target.cuda(async=True))
+        else:
+            img, target = Variable(img, volatile=True), Variable(target)
         y_pred = model(img)
         test_loss += F.nll_loss(y_pred, target, size_average=False).data[0]
         pred = y_pred.data.max(1, keepdim=True)[1]
@@ -115,12 +148,24 @@ def get_random_params():
     params['minibatch_size'] = args.batch_size
 
     # number of hidden layers
-    args.num_hidden_layers = 2 ** np.random.randint(7)
+    args.num_hidden_layers = 2 ** np.random.randint(6)
     params['num_hidden_layers'] = args.num_hidden_layers
 
     # number of hidden units
-    args.hidden_dim = 2 ** np.random.randint(3, 11)
-    params['num_hidden_units'] = args.hidden_dim
+    args.num_hidden_units = 2 ** np.random.randint(3, 11)
+    params['num_hidden_units'] = args.num_hidden_units
+
+    # learning rate
+    args.learning_rate = np.random.choice(np.logspace(-2, -6, 10))
+    params['learning_rate'] = args.learning_rate
+
+    # weight decay
+    args.weight_decay = np.random.choice(np.linspace(0, 0.5, 5))
+    params['weight_decay'] = args.weight_decay
+
+    # initializer
+    args.weight_init = np.random.choice(['none', 'uniform', 'xavier_normal'])
+    params['weight_init'] = args.weight_init
 
     return params
 
@@ -130,30 +175,29 @@ def get_random_params():
 # ------------------------------------------------------------------------------
 
 
-def run(args):
-    # --------------------------------------------------------------------------
-    # Loading Data
-    logger.info('-' * 80)
-    logger.info('Load data files')
-    loader = data.DataLoader(args)
-    (loader_train, loader_valid) = loader.load_training_torch()
-    loader_test = loader.load_test_torch()
+def run(args, dataloaders):
+    (loader_train, loader_valid, loader_test) = dataloaders
 
     # --------------------------------------------------------------------------
     # Model
-    model = models.DynamicNet(args)
+    model = models.DynamicNet(args).cuda(args.gpu) if args.cuda \
+        else models.DynamicNet(args)
+    if args.parallel:
+        model = torch.nn.DataParallel(model)
     model_summary, total_params = models.torch_summarize(model)
-
     if args.print_parameters:
          print(model_summary)
+
     optimizer = None
     if args.optimizer == 'sgd':
-        optimizer = optim.SGD(model.parameters(), lr=args.learning_rate)
+        optimizer = optim.SGD(model.parameters(), lr=args.learning_rate,
+                              weight_decay=args.weight_decay)
     elif args.optimizer == 'adamax':
-        optimizer = optim.Adamax(model.parameters())
+        optimizer = optim.Adamax(model.parameters(), lr=args.learning_rate,
+                                 weight_decay=args.weight_decay)
     elif args.optimizer == 'adam':
         optimizer = optim.Adam(model.parameters(), lr=args.learning_rate,
-                               betas=[0.5, 0.999])
+                               weight_decay=args.weight_decay)
 
     # --------------------------------------------------------------------------
     # Train/Test Loop
@@ -163,29 +207,32 @@ def run(args):
         'epoch': 0,
         'best_ratio': 0,
         'best_accuracy': 0,
-        'train_losses': [],
+        'train_accuracy': [],
+        'valid_losses': [],
+        'valid_accuracy': [],
         'test_losses': [],
         'test_accuracy': [],
-        'train_accuracy': []
     }
-    patience = 3
+    patience = 5
         # early stop training when ratio does not improve in this many times
 
     for epoch in range(1, args.num_epochs + 1):
         stats['epoch'] = epoch
-        train(loader_train, loader_valid, model, optimizer, stats)
-        test(loader_test, model, stats)
+        try:
+            train(loader_train, loader_valid, model, optimizer, stats)
+            test(loader_test, model, stats)
+        except KeyboardInterrupt:
+            logger.info(stats)
+            raise
 
         # accuracy ratio to model capacity
-        ratio = stats['test_accuracy'][-1] / (total_params * epoch)**(1/10.)
+        ratio = stats['test_accuracy'][-1] / (total_params * epoch)**.1
         if ratio > stats['best_ratio']:
             stats['best_ratio'] = ratio
             stats['best_accuracy'] = stats['test_accuracy'][-1]
-            if args.early_stop:
-                patience = 3
+            patience = 5
         else:
-            if args.early_stop:
-                patience -= 1
+            patience -= 1
         logger.info('ratio to capacity: {} / {} = {:.4f}'
                     ''.format(stats['test_accuracy'][-1],
                               total_params * epoch, ratio))
@@ -196,12 +243,21 @@ def run(args):
 
 
 if __name__ == '__main__':
+    # set up logger
+    logger.setLevel(logging.INFO)
+    fmt = logging.Formatter('%(asctime)s: [ %(message)s ]',
+                            '%m/%d/%Y %I:%M:%S %p')
+    console = logging.StreamHandler()
+    console.setFormatter(fmt)
+    logger.addHandler(console)
+
+    # parser
     parser = argparse.ArgumentParser(
         'MNIST Handwritten Digits Classifier',
         formatter_class=argparse.ArgumentDefaultsHelpFormatter
     )
 
-    # Runtime options (later add options for gpu use)
+    # Runtime options
     runtime = parser.add_argument_group('Runtime')
     runtime.add_argument('--num-epochs', type=int, default=50,
                         help='Number of full data iterations')
@@ -213,12 +269,18 @@ if __name__ == '__main__':
                          choices=['original', 'dataset1', 'dataset2',
                                   'dataset3', 'dataset4'],
                          help='Name of modified datasets')
-    runtime.add_argument('--num-random-models', type=int, default=10,
-                         help='number of random searches over hyper parameter '
+    runtime.add_argument('--num-random-models', type=int, default=1,
+                         help='Number of random searches over hyper parameter '
                               'space')
     runtime.add_argument('--early-stop', action='store_true',
-                         help='stop training when no improvements seen in 3'
+                         help='Stop training when no improvements seen in 3'
                          'times')
+    runtime.add_argument('--no-cuda', action='store_true',
+                         help='Use CPU only')
+    runtime.add_argument('--gpu', type=int, default=-1,
+                         help="Specify GPU device id to use")
+    runtime.add_argument('--parallel', type=bool, default=False,
+                         help='Use DataParallel on all available GPUs')
 
     # Files
     files = parser.add_argument_group('Filesystem')
@@ -241,22 +303,25 @@ if __name__ == '__main__':
 
     # Model architecture
     model = parser.add_argument_group('Model')
-    model.add_argument('--model-type', type=str, default='2hdd',
-                       help='Model architecture type')
-    model.add_argument('--model-name', type=str, default='',
+    model.add_argument('--model-name', type=str, default=None,
                        help='Unique model identifier')
     model.add_argument('--input-dim', type=int, default=28*28,
                        help='input data dimension')
     model.add_argument('--output-dim', type=int, default=10,
                        help='output dimension (num. of classes)')
-    model.add_argument('--hidden-dim', type=int, default=64,
+    model.add_argument('--num-hidden-units', type=int, default=64,
                        help='Dimension of hidden layer')
     model.add_argument('--num-hidden-layers', type=int, default=1,
                        help='Number of hidden layers')
     model.add_argument('--optimizer', type=str, default='sgd',
                        help='Optimizer: [sgd, adamax, adam]')
     model.add_argument('--learning-rate', type=float, default=1e-4,
-                       help='Learning rate for SGD')
+                       help='Learning rate for optimizer')
+    model.add_argument('--weight-decay', type=float, default=0,
+                       help='Weight decay, as L2 regularization by default')
+    model.add_argument('--weight-init', type=str, default='none',
+                       help='Add weight initialization scheme',
+                       choices=['none', 'uniform', 'xavier_normal'])
 
     # General
     general = parser.add_argument_group('General')
@@ -266,16 +331,18 @@ if __name__ == '__main__':
                          help='draw images after test loop for verification')
     general.add_argument('--plot-losses', action='store_true',
                          help='plot train/test losses to epochs')
+    general.add_argument('--log-file', action='store_true',
+                         help='write logging on a file')
     args = parser.parse_args()
     set_defaults(args)
 
-    # set up logger
-    logger.setLevel(logging.INFO)
-    fmt = logging.Formatter('%(asctime)s: [ %(message)s ]',
-                            '%m/%d/%Y %I:%M:%S %p')
-    console = logging.StreamHandler()
-    console.setFormatter(fmt)
-    logger.addHandler(console)
+    # --------------------------------------------------------------------------
+    # Loading Data
+    logger.info('-' * 80)
+    logger.info('Load data files')
+    loader = data.DataLoader(args)
+    (loader_train, loader_valid) = loader.load_training_torch()
+    loader_test = loader.load_test_torch()
 
     best_model_ratio = 0
     best_model = None
@@ -285,14 +352,17 @@ if __name__ == '__main__':
         logger.info('Model #{}'.format(m+1))
         if m > 0:
             h_params = get_random_params()  # set random parameters
-        else:
+        else:  # run with the default (or given) settings first
             h_params = {
-                'batch_size': args.batch_size,
+                'minibatch_size': args.batch_size,
                 'num_hidden_layers': args.num_hidden_layers,
-                'hidden_dim': args.hidden_dim
+                'num_hidden_units': args.num_hidden_units,
+                'learning_rate': args.learning_rate,
+                'weight_decay': args.weight_decay,
+                'weight_init': args.weight_init
             }
-        print("\n{}\n".format(h_params))
-        stats = run(args)  # RUN ~!
+        logger.info("{}".format(h_params))
+        stats = run(args, (loader_train, loader_valid, loader_test))  # RUN ~!
         if stats['best_ratio'] >= best_model_ratio:
             best_model_ratio = stats['best_ratio']
             best_model = h_params
@@ -304,13 +374,13 @@ if __name__ == '__main__':
     # Display Results
     logger.info('-' * 80)
     logger.info('Best Model...')
-    print(best_model)
-    print(best_stats)
+    logger.info(best_model)
+    logger.info(best_stats)
 
     if args.plot_losses:
         import matplotlib.pyplot as plt
         x = list(range(args.num_epochs))
-        plt.plot(x, best_model['train_losses'], 'g', label='train')
+        plt.plot(x, best_model['valid_losses'], 'g', label='train')
         plt.plot(x, best_model['test_losses'], 'r', label='test')
         plt.xlabel('epoch')
         plt.ylabel('loss')
