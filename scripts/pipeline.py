@@ -384,7 +384,7 @@ if __name__ == '__main__':
         import matplotlib.pyplot as plt
 
         x = list(range(args.num_epochs))
-        plt.figure(figsize=(5,3))
+        plt.figure(figsize=(7,4))
         plt.subplot(121)
         plt.plot(x, best_stats['valid_losses'], 'g', label='train')
         plt.plot(x, best_stats['test_losses'], 'r', label='test')

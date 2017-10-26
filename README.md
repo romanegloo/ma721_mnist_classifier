@@ -25,10 +25,10 @@ skills of tuning a neural network with configurable parameters
     between 0 and 999.  
   * [testing] The same as above with the subsets (0\~8,000 / 1,000\~9,000 /
     2,000\~10,000)
-   <div style="width:100%; text-align:center;">
+  <div style="width:100%; text-align:center;">
 	<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/example_dataset3.png?raw=true" alt="example of dataset3" style="width:270px;"/>
 	</div>
-  
+
 * **Dataset 4**  
   * [training] Add one image upon another image with two subsets from
     (0~50,000 / 10,000 ~ 60,000), the labels are in between 0 and 44 (unique
@@ -74,10 +74,10 @@ skills of tuning a neural network with configurable parameters
 #### Loss
 
 <div style="width:100%; text-align:center;">
-<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/loss_dataset1.png?raw=true" alt="Losses of Dataset 1" style="width:270px;"/>
-<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/loss_dataset2.png?raw=true" alt="Losses of Dataset 2" style="width:270px;"/>
-<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/loss_dataset3.png?raw=true" alt="Losses of Dataset 3" style="width:270px;"/>
-<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/loss_dataset4.png?raw=true" alt="Losses of Dataset 4" style="width:270px;"/>
+	<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/plot-dataset1.png?raw=true" alt="Dataset1, loss and accuracy" style="width:550px;"/>
+	<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/plot-dataset2.png?raw=true" alt="Dataset2, loss and accuracy" style="width:550px;"/>
+	<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/plot-dataset3.png?raw=true" alt="Dataset3, loss and accuracy" style="width:550px;"/>
+	<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/plot-dataset4.png?raw=true" alt="Dataset4, loss and accuracy" style="width:550px;"/>
 </div>
 
 #### Accuracy
