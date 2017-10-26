@@ -25,16 +25,18 @@ skills of tuning a neural network with configurable parameters
     between 0 and 999.  
   * [testing] The same as above with the subsets (0\~8,000 / 1,000\~9,000 /
     2,000\~10,000)
-    
-<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/example_dataset3.png?raw=true" alt="example of dataset3" style="width:270px;"/>
+   <div style="width:100%; text-align:center;">
+	<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/example_dataset3.png?raw=true" alt="example of dataset3" style="width:270px;"/>
+	</div>
   
 * **Dataset 4**  
   * [training] Add one image upon another image with two subsets from
     (0~50,000 / 10,000 ~ 60,000), the labels are in between 0 and 44 (unique
     labels for all possible combinations)  
   * [testing] The same as above from two subsets (0\~9,000 / 1,000\~10,000)
-
-<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/example_dataset4.png?raw=true" alt="example of datset4" style="width:270px;"/>
+	<div style="width:100%; text-align:center;">  
+	<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/example_dataset4.png?raw=true" alt="example of datset4" style="width:270px;"/>
+	</div>
 
 ### Configurable Parameters
 
@@ -69,12 +71,22 @@ skills of tuning a neural network with configurable parameters
 | dataset3 | 10 x 2 x 256 | 512 | SGD (lr=3e-3) | L2 (decay=0.2) | 98.96 / 76.97 / 79.04 | 15.73 | 99.9 / 85.26 (48 epochs) |
 | dataset4 | 5 x 2 x 128 | 128 | Adam (lr=1e-4) | L2 (decay=0.1) | 78.24 / 75.46 / 76.62 | 19.01 | 94.84 / 81.93 (33 epochs) |
 
-#### Losses
+#### Loss
 
-<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/dataset1.png?raw=true" alt="Losses of Dataset 1" style="width:270px;"/>
-<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/dataset2.png?raw=true" alt="Losses of Dataset 2" style="width:270px;"/>
-<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/dataset3.png?raw=true" alt="Losses of Dataset 3" style="width:270px;"/>
-<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/dataset4.png?raw=true" alt="Losses of Dataset 4" style="width:270px;"/>
+<div style="width:100%; text-align:center;">
+<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/loss_dataset1.png?raw=true" alt="Losses of Dataset 1" style="width:270px;"/>
+<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/loss_dataset2.png?raw=true" alt="Losses of Dataset 2" style="width:270px;"/>
+<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/loss_dataset3.png?raw=true" alt="Losses of Dataset 3" style="width:270px;"/>
+<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/loss_dataset4.png?raw=true" alt="Losses of Dataset 4" style="width:270px;"/>
+</div>
+
+#### Accuracy
+<div style="width:100%; text-align:center;">
+<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/acc_dataset1.png?raw=true" alt="Accuracy of Dataset 1" style="width:270px;"/>
+<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/acc_dataset2.png?raw=true" alt="Accuracy of Dataset 2" style="width:270px;"/>
+<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/acc_dataset3.png?raw=true" alt="Accuracy of Dataset 3" style="width:270px;"/>
+<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/acc_dataset4.png?raw=true" alt="Accuracy of Dataset 4" style="width:270px;"/>
+</div>
 
 ### Usage
 
@@ -120,17 +132,17 @@ usage: MNIST Handwritten Digits Classifier [-h] [--num-epochs NUM_EPOCHS]
                                            [--optimizer OPTIMIZER]
                                            [--learning-rate LEARNING_RATE]
                                            [--weight-decay WEIGHT_DECAY]
-                                           [--weight-init {none,uniform,xavier_normal}]
+                                           [--weight-init {default,uniform,normal,xavier_normal}]
                                            [--print-parameters] [--draw-image]
-                                           [--plot-losses] [--log-file]
+                                           [--print-plots] [--log-file]
 
 optional arguments:
   -h, --help            show this help message and exit
   --model-dir MODEL_DIR
-                        Directory for saved models (default:
-                        /home/jno236/projects/ma721_project1/mnist_x/../model)
-  --data-dir DATA_DIR   directory of datasets (default:
-                        /home/jno236/projects/ma721_project1/mnist_x/../data)
+                        Directory for saved models (default: /Users/jihonoh/pr
+                        ojects/ma721_project1/mnist_x/../model)
+  --data-dir DATA_DIR   directory of datasets (default: /Users/jihonoh/project
+                        s/ma721_project1/mnist_x/../data)
   --train-img-file TRAIN_IMG_FILE
                         Decompressed MNIST train (images) file (default:
                         train-images-idx3-ubyte)
@@ -183,11 +195,12 @@ Model:
   --weight-decay WEIGHT_DECAY
                         Weight decay, as L2 regularization by default
                         (default: 0)
-  --weight-init {none,uniform,xavier_normal}
-                        Add weight initialization scheme (default: none)
+  --weight-init {default,uniform,normal,xavier_normal}
+                        Add weight initialization scheme (default: default)
 
 General:
   --print-parameters    Print model parameters (default: False)
-  --plot-losses         plot train/test losses to epochs (default: False)
+  --print-plots         plot train/test losses and accuracies to epochs
+                        (default: False)
   --log-file            write logging on a file (default: False)
 ```

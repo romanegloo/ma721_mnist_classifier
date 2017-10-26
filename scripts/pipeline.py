@@ -330,8 +330,8 @@ if __name__ == '__main__':
                          help='Print model parameters')
     runtime.add_argument('--draw-image', action='store_true',
                          help='draw images after test loop for verification')
-    general.add_argument('--plot-losses', action='store_true',
-                         help='plot train/test losses to epochs')
+    general.add_argument('--print-plots', action='store_true',
+                         help='plot train/test losses and accuracies to epochs')
     general.add_argument('--log-file', action='store_true',
                          help='write logging on a file')
     args = parser.parse_args()
@@ -380,18 +380,26 @@ if __name__ == '__main__':
     logger.info(best_model)
     logger.info(best_stats)
 
-    if args.plot_losses:
+    if args.print_plots:
         import matplotlib.pyplot as plt
 
         x = list(range(args.num_epochs))
+        plt.figure(figsize=(5,3))
+        plt.subplot(121)
         plt.plot(x, best_stats['valid_losses'], 'g', label='train')
         plt.plot(x, best_stats['test_losses'], 'r', label='test')
         plt.xlabel('epoch')
         plt.ylabel('loss')
         plt.title('Test/Train Losses -- {}'.format(args.dataset_name))
         plt.legend()
-        plt.savefig("{}.png".format(args.dataset_name))
-        try:
-            plt.show()
-        except:
-            logger.warning('plot cannot be displayed')
+
+        plt.subplot(122)
+        plt.plot(x, best_stats['valid_accuracy'], 'g', label='train')
+        plt.plot(x, best_stats['test_accuracy'], 'r', label='test')
+        plt.xlabel('epoch')
+        plt.ylabel('accuracy')
+        plt.title('Test/Train Accuracies -- {}'.format(args.dataset_name))
+        plt.legend()
+
+        plt.savefig("plot-{}.png".format(args.dataset_name))
+        plt.show()
