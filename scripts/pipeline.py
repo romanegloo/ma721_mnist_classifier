@@ -387,6 +387,6 @@ if __name__ == '__main__':
         plt.plot(x, best_stats['test_losses'], 'r', label='test')
         plt.xlabel('epoch')
         plt.ylabel('loss')
-        plt.title('Test/Train Losses')
+        plt.title('Test/Train Losses -- {}'.format(args.dataset_name))
         plt.legend()
         plt.show()

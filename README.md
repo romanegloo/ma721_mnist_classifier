@@ -59,27 +59,34 @@ skills of tuning a neural network with configurable parameters
 
 | dataset | capacity (epoch x layers x units) | batch\_size | optimizer | regularization | accuracy (tr/vl/ts) | ratio (acc. to computation) | best accuracy |
 |:--------:|:---------------------------------:|:----------:|:--------:|:--------------:|:--------:|:--------------------:|:-------------:|
-| dataset1 | 6 x 2 x 48 | 64 | SGD (lr=2e-4) | None | 89.69 / 88.00 / 91.60 | 26.39 | 99.20 (48 epochs) |
-| dataset2 | 7 x 4 x 128 | 512 | Adam (lr=1e-4)| L2 (decay=0.1) | 85.34 / 86.42 / 87.49 | 23.75 | 96.11 (47 epochs) |
+| dataset1 | 6 x 2 x 48 | 64 | SGD (lr=2e-4) | L2 (decay=0.1) | 89.69 / 88.00 / 91.60 | 26.39 | 99.20 (48 epochs) |
+| dataset2 | 2 x 4 x 128 | 512 | Adam (lr=1e-4)| L2 (decay=0.1) | 86.52 / 88.93 / 89.80 | 25.39 | 95.76 (50 epochs) |
 | dataset3 | 10 x 2 x 256 | 512 | SGD (lr=3.5e-3) | L2 (decay=0.2) | 97.23 / 76.45 / 77.80 | 15.92 | 84.99 (48 epochs) |
 | dataset4 | 5 x 4 x 64 | 64 | SGD (lr=5.9e-5) | L2 (decay=0.1) | 72.88 / 70.34 / 71.39 | 20.30 | 80.31 (47 epochs) |
 
 #### Losses
 
-![Dataset 1][losses-dataset1]
+<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/dataset1.png?raw=true" alt="Losses of Dataset 1" style="width:350px;"/>
+<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/dataset2.png?raw=true" alt="Losses of Dataset 2" style="width:350px;"/>
+<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/dataset3.png?raw=true" alt="Losses of Dataset 3" style="width:350px;"/>
+<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/dataset4.png?raw=true" alt="Losses of Dataset 4" style="width:350px;"/>
+
 ### Usage
 
 run a model with specific settings:
+
 ```
 python3 scripts/pipeline.py --dataset-name dataset3 --num-hidden-layers 2 --num-hidden-units 256 --batch-size 128 --optimizer sgd --learning-rate 1e-3 --weight-init xavier_normal --weight-decay .5
 ```
 
 random search for optimal settings:
+
 ```
 python3 scripts/pipeline.py --dataset-name dataset3 --num-random-models 50 --weight-init xavier_normal --weight-decay .3 --early-stop
 ```
 
 all options
+
 ```
 usage: MNIST Handwritten Digits Classifier [-h] [--num-epochs NUM_EPOCHS]
                                            [--batch-size BATCH_SIZE]
@@ -173,5 +180,3 @@ General:
   --plot-losses         plot train/test losses to epochs (default: False)
   --log-file            write logging on a file (default: False)
 ```
-
-[losses-dataset1]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Losses Dataset 1"
