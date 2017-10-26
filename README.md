@@ -3,7 +3,7 @@
 * Author: Jiho Noh (jiho.noh@uky.edu)
 
 ## Description
-This project is for hyper-parameter optimization with a number of modified
+This project is on hyper-parameter optimization with a number of modified
 MNIST datasets. The goal is 1) to learn how to implement a neural network by
 using a conventional deep learning platforms, and 2) to obtain practical
 skills of tuning a neural network with configurable parameters
@@ -25,11 +25,16 @@ skills of tuning a neural network with configurable parameters
     between 0 and 999.  
   * [testing] The same as above with the subsets (0\~8,000 / 1,000\~9,000 /
     2,000\~10,000)
+    
+<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/example_dataset3.png?raw=true" alt="example of dataset3" style="width:270px;"/>
+  
 * **Dataset 4**  
   * [training] Add one image upon another image with two subsets from
     (0~50,000 / 10,000 ~ 60,000), the labels are in between 0 and 44 (unique
     labels for all possible combinations)  
   * [testing] The same as above from two subsets (0\~9,000 / 1,000\~10,000)
+
+<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/example_dataset4.png?raw=true" alt="example of datset4" style="width:270px;"/>
 
 ### Configurable Parameters
 
@@ -57,12 +62,12 @@ skills of tuning a neural network with configurable parameters
 
 ### Results
 
-| dataset | capacity (epoch x layers x units) | batch\_size | optimizer | regularization | accuracy (tr/vl/ts) | ratio (acc. to computation) | best accuracy |
+| dataset | capacity (epoch x layers x units) | batch\_size | optimizer | regularization | accuracy (tr/vl/ts) | ratio (acc. to computation) | best accuracy (tr/ts) |
 |:--------:|:---------------------------------:|:----------:|:--------:|:--------------:|:--------:|:--------------------:|:-------------:|
-| dataset1 | 6 x 2 x 48 | 64 | SGD (lr=2e-4) | L2 (decay=0.1) | 89.69 / 88.00 / 91.60 | 26.39 | 99.20 (48 epochs) |
-| dataset2 | 2 x 4 x 128 | 512 | Adam (lr=1e-4)| L2 (decay=0.1) | 86.52 / 88.93 / 89.80 | 25.39 | 95.76 (50 epochs) |
-| dataset3 | 10 x 2 x 256 | 512 | SGD (lr=3e-3) | L2 (decay=0.2) | 98.96 / 76.97 / 79.04 | 15.73 | 85.26 (48 epochs) |
-| dataset4 | 5 x 2 x 128 | 128 | Adam (lr=1e-4) | L2 (decay=0.1) | 78.24 / 75.46 / 76.62 | 19.01 | 81.93 (33 epochs) |
+| dataset1 | 6 x 2 x 48 | 64 | SGD (lr=2e-4) | L2 (decay=0.1) | 89.69 / 88.00 / 91.60 | 26.39 | 98.92 / 99.20 (48 epochs) |
+| dataset2 | 2 x 4 x 128 | 512 | Adam (lr=1e-4)| L2 (decay=0.1) | 86.52 / 88.93 / 89.80 | 25.39 | 96.23 / 95.76 (50 epochs) |
+| dataset3 | 10 x 2 x 256 | 512 | SGD (lr=3e-3) | L2 (decay=0.2) | 98.96 / 76.97 / 79.04 | 15.73 | 99.9 / 85.26 (48 epochs) |
+| dataset4 | 5 x 2 x 128 | 128 | Adam (lr=1e-4) | L2 (decay=0.1) | 78.24 / 75.46 / 76.62 | 19.01 | 94.84 / 81.93 (33 epochs) |
 
 #### Losses
 
