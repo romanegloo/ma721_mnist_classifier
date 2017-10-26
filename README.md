@@ -66,10 +66,10 @@ skills of tuning a neural network with configurable parameters
 
 #### Losses
 
-<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/dataset1.png?raw=true" alt="Losses of Dataset 1" style="width:350px;"/>
-<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/dataset2.png?raw=true" alt="Losses of Dataset 2" style="width:350px;"/>
-<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/dataset3.png?raw=true" alt="Losses of Dataset 3" style="width:350px;"/>
-<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/dataset4.png?raw=true" alt="Losses of Dataset 4" style="width:350px;"/>
+<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/dataset1.png?raw=true" alt="Losses of Dataset 1" style="width:270px;"/>
+<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/dataset2.png?raw=true" alt="Losses of Dataset 2" style="width:270px;"/>
+<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/dataset3.png?raw=true" alt="Losses of Dataset 3" style="width:270px;"/>
+<img src="https://github.com/romanegloo/ma721_mnist_classifier/blob/master/dataset4.png?raw=true" alt="Losses of Dataset 4" style="width:270px;"/>
 
 ### Usage
 
