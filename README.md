@@ -61,8 +61,8 @@ skills of tuning a neural network with configurable parameters
 |:--------:|:---------------------------------:|:----------:|:--------:|:--------------:|:--------:|:--------------------:|:-------------:|
 | dataset1 | 6 x 2 x 48 | 64 | SGD (lr=2e-4) | L2 (decay=0.1) | 89.69 / 88.00 / 91.60 | 26.39 | 99.20 (48 epochs) |
 | dataset2 | 2 x 4 x 128 | 512 | Adam (lr=1e-4)| L2 (decay=0.1) | 86.52 / 88.93 / 89.80 | 25.39 | 95.76 (50 epochs) |
-| dataset3 | 10 x 2 x 256 | 512 | SGD (lr=3.5e-3) | L2 (decay=0.2) | 97.23 / 76.45 / 77.80 | 15.92 | 84.99 (48 epochs) |
-| dataset4 | 5 x 4 x 64 | 64 | SGD (lr=5.9e-5) | L2 (decay=0.1) | 72.88 / 70.34 / 71.39 | 20.30 | 80.31 (47 epochs) |
+| dataset3 | 10 x 2 x 256 | 512 | SGD (lr=3e-3) | L2 (decay=0.2) | 98.96 / 76.97 / 79.04 | 15.73 | 85.26 (48 epochs) |
+| dataset4 | 5 x 2 x 128 | 128 | Adam (lr=1e-4) | L2 (decay=0.1) | 78.24 / 75.46 / 76.62 | 19.01 | 81.93 (33 epochs) |
 
 #### Losses
 
@@ -79,10 +79,16 @@ run a model with specific settings:
 python3 scripts/pipeline.py --dataset-name dataset3 --num-hidden-layers 2 --num-hidden-units 256 --batch-size 128 --optimizer sgd --learning-rate 1e-3 --weight-init xavier_normal --weight-decay .5
 ```
 
-random search for optimal settings:
+random search (--num-random-models) for optimal settings:
 
 ```
 python3 scripts/pipeline.py --dataset-name dataset3 --num-random-models 50 --weight-init xavier_normal --weight-decay .3 --early-stop
+```
+
+use CPU only (--no-cuda), otherwise it will attempt to use GPUs
+
+```
+python3 scripts/pipeline.py --dataset-name dataset3 --num-random-models 3 --no-cuda
 ```
 
 all options

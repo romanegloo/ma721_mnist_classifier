@@ -382,6 +382,7 @@ if __name__ == '__main__':
 
     if args.plot_losses:
         import matplotlib.pyplot as plt
+
         x = list(range(args.num_epochs))
         plt.plot(x, best_stats['valid_losses'], 'g', label='train')
         plt.plot(x, best_stats['test_losses'], 'r', label='test')
@@ -389,4 +390,8 @@ if __name__ == '__main__':
         plt.ylabel('loss')
         plt.title('Test/Train Losses -- {}'.format(args.dataset_name))
         plt.legend()
-        plt.show()
+        plt.savefig("{}.png".format(args.dataset_name))
+        try:
+            plt.show()
+        except:
+            logger.warning('plot cannot be displayed')

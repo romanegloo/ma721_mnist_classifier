@@ -1,6 +1,16 @@
+certifi==2017.7.27.1
+chardet==3.0.4
+cycler==0.10.0
+idna==2.6
+matplotlib==2.1.0
 numpy==1.13.3
+prettytable==0.7.2
+pyparsing==2.2.0
+python-dateutil==2.6.1
+pytz==2017.2
 PyYAML==3.12
 requests==2.18.4
+six==1.11.0
 torch==0.2.0.post3
 tqdm==4.19.4
 urllib3==1.22
