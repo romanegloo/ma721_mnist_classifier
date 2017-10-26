@@ -13,6 +13,7 @@ from torch.utils.data.sampler import SubsetRandomSampler
 
 # set up logger
 logger = logging.getLogger()
+np.random.seed(1234)
 
 
 class DataLoader(object):

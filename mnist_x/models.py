@@ -3,6 +3,7 @@ import torch.nn.functional as F
 from torch.nn.modules.module import _addindent
 import torch.nn.init as init
 import numpy as np
+from functools import partial
 
 
 # define a network with multiple layers
@@ -20,17 +21,7 @@ class DynamicNet(nn.Module):
         self.output_layer = nn.Linear(args.num_hidden_units, args.output_dim)
 
         # initialize weights
-        if args.weight_init == 'uniform':
-            init.uniform(self.input_layer.weight)
-            for layer in self.middle_layers:
-                init.uniform(layer.weight)
-            init.uniform(self.output_layer.weight)
-        elif args.weight_init == 'xavier_normal':
-            init.xavier_normal(self.input_layer.weight, gain=np.sqrt(2))
-            for layer in self.middle_layers:
-                init.xavier_normal(layer.weight, gain=np.sqrt(2))
-            init.xavier_normal(self.output_layer.weight, gain=np.sqrt(2))
-
+        self.initialize_weights(args.weight_init)
 
     def forward(self, x):
         h_relu = self.input_layer(self.input_bn(x)).clamp(min=0)
@@ -38,6 +29,21 @@ class DynamicNet(nn.Module):
             h_relu = self.middle_layers[i](self.middle_bn(h_relu)).clamp(min=0)
         y_pred = self.output_layer(h_relu)
         return F.log_softmax(y_pred)
+
+    def initialize_weights(self, fn_name):
+        if fn_name == 'uniform':
+            fn = init.uniform
+        elif fn_name == 'normal':
+            fn = init.normal
+        elif fn_name == 'xavier_normal':
+            fn = partial(init.xavier_normal, gain=np.sqrt(2))
+        else:
+            return
+
+        fn(self.input_layer.weight)
+        for layer in self.middle_layers:
+            fn(layer.weight)
+        fn(self.output_layer.weight)
 
 
 # ------------------------------------------------------------------------------

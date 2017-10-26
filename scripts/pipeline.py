@@ -319,9 +319,10 @@ if __name__ == '__main__':
                        help='Learning rate for optimizer')
     model.add_argument('--weight-decay', type=float, default=0,
                        help='Weight decay, as L2 regularization by default')
-    model.add_argument('--weight-init', type=str, default='none',
+    model.add_argument('--weight-init', type=str, default='default',
                        help='Add weight initialization scheme',
-                       choices=['none', 'uniform', 'xavier_normal'])
+                       choices=['default', 'uniform', 'normal',
+                                'xavier_normal'])
 
     # General
     general = parser.add_argument_group('General')
@@ -344,6 +345,8 @@ if __name__ == '__main__':
     (loader_train, loader_valid) = loader.load_training_torch()
     loader_test = loader.load_test_torch()
 
+    np.random.seed(1234)
+    torch.manual_seed(1234)
     best_model_ratio = 0
     best_model = None
     best_stats = None
@@ -380,8 +383,8 @@ if __name__ == '__main__':
     if args.plot_losses:
         import matplotlib.pyplot as plt
         x = list(range(args.num_epochs))
-        plt.plot(x, best_model['valid_losses'], 'g', label='train')
-        plt.plot(x, best_model['test_losses'], 'r', label='test')
+        plt.plot(x, best_stats['valid_losses'], 'g', label='train')
+        plt.plot(x, best_stats['test_losses'], 'r', label='test')
         plt.xlabel('epoch')
         plt.ylabel('loss')
         plt.title('Test/Train Losses')

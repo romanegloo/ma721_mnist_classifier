@@ -29,7 +29,7 @@ skills of tuning a neural network with configurable parameters
   * [training] Add one image upon another image with two subsets from
     (0~50,000 / 10,000 ~ 60,000), the labels are in between 0 and 44 (unique
     labels for all possible combinations)  
-  * [testing] The same as above from two subsets (0~9,000 / 1,000~10,000)
+  * [testing] The same as above from two subsets (0\~9,000 / 1,000\~10,000)
 
 ### Configurable Parameters
 
@@ -57,13 +57,16 @@ skills of tuning a neural network with configurable parameters
 
 ### Results
 
-| dataset | capacity (epoch x layers x units) | batch\_size | optimizer | regularization | accuracy (tr/vl/ts) | ratio (acc. to #params) | best accuracy |
+| dataset | capacity (epoch x layers x units) | batch\_size | optimizer | regularization | accuracy (tr/vl/ts) | ratio (acc. to computation) | best accuracy |
 |:--------:|:---------------------------------:|:----------:|:--------:|:--------------:|:--------:|:--------------------:|:-------------:|
-| dataset1 | 6 x 4 x 32 | 64 | SGD (lr=1e-4) | None | 92.24 / 89.40 / 91.26 | 29.53 | 99.20 (48 epochs) |
+| dataset1 | 6 x 2 x 48 | 64 | SGD (lr=2e-4) | None | 89.69 / 88.00 / 91.60 | 26.39 | 99.20 (48 epochs) |
 | dataset2 | 7 x 4 x 128 | 512 | Adam (lr=1e-4)| L2 (decay=0.1) | 85.34 / 86.42 / 87.49 | 23.75 | 96.11 (47 epochs) |
-| dataset3 | 14 x 2 x 128 | 128 | SGD (lr=1e-3) | L2 (decay=0.3) | 84.55 / 71.05 / 71.92 | 15.02 | 80.31 (50 epochs) |
+| dataset3 | 10 x 2 x 256 | 512 | SGD (lr=3.5e-3) | L2 (decay=0.2) | 97.23 / 76.45 / 77.80 | 15.92 | 84.99 (48 epochs) |
 | dataset4 | 5 x 4 x 64 | 64 | SGD (lr=5.9e-5) | L2 (decay=0.1) | 72.88 / 70.34 / 71.39 | 20.30 | 80.31 (47 epochs) |
 
+#### Losses
+
+![Dataset 1][losses-dataset1]
 ### Usage
 
 run a model with specific settings:
@@ -170,3 +173,5 @@ General:
   --plot-losses         plot train/test losses to epochs (default: False)
   --log-file            write logging on a file (default: False)
 ```
+
+[losses-dataset1]: https://github.com/adam-p/markdown-here/raw/master/src/common/images/icon48.png "Losses Dataset 1"
