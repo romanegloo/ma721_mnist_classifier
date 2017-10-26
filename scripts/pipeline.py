@@ -238,6 +238,8 @@ def run(args, dataloaders):
                               total_params * epoch, ratio))
         if patience == 0 and args.early_stop:
             break
+        if np.isnan(stats['valid_losses'][-1]):
+            break
 
     return stats
 

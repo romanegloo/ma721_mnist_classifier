@@ -10,7 +10,9 @@ class DynamicNet(nn.Module):
     def __init__(self, args):
         super(DynamicNet, self).__init__()
         self.args = args
+        self.input_bn = nn.BatchNorm1d(args.input_dim)
         self.input_layer = nn.Linear(args.input_dim, args.num_hidden_units)
+        self.middle_bn = nn.BatchNorm1d(args.num_hidden_units)
         self.middle_layers = nn.ModuleList()
         for _ in range(args.num_hidden_layers - 1):
             self.middle_layers.append(nn.Linear(args.num_hidden_units,
@@ -31,9 +33,9 @@ class DynamicNet(nn.Module):
 
 
     def forward(self, x):
-        h_relu = self.input_layer(x).clamp(min=0)
+        h_relu = self.input_layer(self.input_bn(x)).clamp(min=0)
         for i in range(self.args.num_hidden_layers - 1):
-            h_relu = self.middle_layers[i](h_relu).clamp(min=0)
+            h_relu = self.middle_layers[i](self.middle_bn(h_relu)).clamp(min=0)
         y_pred = self.output_layer(h_relu)
         return F.log_softmax(y_pred)
 
