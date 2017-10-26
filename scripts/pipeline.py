@@ -5,8 +5,6 @@ import logging
 import os
 import subprocess
 import numpy as np
-from prettytable import PrettyTable
-import sys
 
 import torch
 import torch.nn.functional as F
@@ -145,7 +143,7 @@ def get_random_params():
 
     # minibatch_size
     args.batch_size = 2 ** np.random.randint(4, 11)
-    params['minibatch_size'] = args.batch_size
+    params['batch_size'] = args.batch_size
 
     # number of hidden layers
     args.num_hidden_layers = 2 ** np.random.randint(6)
@@ -356,7 +354,7 @@ if __name__ == '__main__':
             h_params = get_random_params()  # set random parameters
         else:  # run with the default (or given) settings first
             h_params = {
-                'minibatch_size': args.batch_size,
+                'batch_size': args.batch_size,
                 'num_hidden_layers': args.num_hidden_layers,
                 'num_hidden_units': args.num_hidden_units,
                 'learning_rate': args.learning_rate,

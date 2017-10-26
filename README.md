@@ -19,11 +19,12 @@ skills of tuning a neural network with configurable parameters
   * [testing] The full entire original testing dataset
 
 * **Dataset 3**  
-  * [training] Take three subsets (0~40,000 / 10,000~50,000 / 20,000~60,000) of
+  * [training] Take three subsets (0\~40,000 / 10,000\~50,000 / 20,000\~60,
+  000) of
     the images and concatenate them to make three digit numbers. Labels are in
     between 0 and 999.  
-  * [testing] The same as above with the subsets (0~8,000 / 1,000~9,000 /
-    2,000~10,000)
+  * [testing] The same as above with the subsets (0\~8,000 / 1,000\~9,000 /
+    2,000\~10,000)
 * **Dataset 4**  
   * [training] Add one image upon another image with two subsets from
     (0~50,000 / 10,000 ~ 60,000), the labels are in between 0 and 44 (unique
