@@ -1,5 +1,4 @@
 numpy==1.13.3
-prettytable==0.7.2
 PyYAML==3.12
 requests==2.18.4
 torch==0.2.0.post3
